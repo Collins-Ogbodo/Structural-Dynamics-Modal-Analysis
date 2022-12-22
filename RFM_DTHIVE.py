@@ -18,7 +18,7 @@ for iter_ in iters:
     for rep in reps: 
         test_rep = rep
         test_name = test_series + '_' + str(iter_) + '_' + str(test_rep)
-        zip_file_path = "Test_Data/" + test_series + "/"+ test_series \
+        zip_file_path = "G:/My Drive/DTHIVE/Python Code/Test_Data/" + test_series + "/"+ test_series \
             + "_" + str(iter_)+ '/' + test_series + "_" \
                 + str(iter_) + "_" + str(rep) + '.zip'
         #directory for dumping the extraction file
