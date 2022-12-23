@@ -1,7 +1,9 @@
-#Import python module
-import os,pickle,zipfile
 import pandas as pd
+import scipy.io
+import os,pickle,zipfile
 import numpy as np
+
+
 
 #Import and process FRF data
 iters = [10]
@@ -80,6 +82,7 @@ for iter_ in iters:
 #%%
 
 #Convert average frf for all sensor to dataframe
+data__frf = pd.DataFrame(sensor_frf_mean)  
 data_frf = pd.DataFrame(sensor_frf_mean)   
 data_frf = data_frf.to_numpy()
 
@@ -88,77 +91,29 @@ data_freq = pd.DataFrame(sensor_frf_freq_mean)
 data_freq = data_freq.to_numpy()
 freq = np.array(data_freq[:,0])
 
+
 #%%
-#Order of degree of freedom
-N = 5
-#Normalisation of frequency
-freq = (freq-min(freq))/(max(freq)-min(freq))
 
-m = 2*N-1  #number of numerator polynomial terms
-n = 2*N    #number of denominator polynomial terms
-
-#Number of modes
-num_mode = 2
-#Power of fitting polynomial
-max_k = 2* num_mode
-
-#Generating Orthorgonal Polynomial
-
-#This function generates the orthogonal polynomial
-#and returns the transformation matric and Polynomials
-thetha_phi = 'denum'
-a= np.ones((2,3))
-
-#Calculating the weighting function at the i_th frequency
-if thetha_phi == 'num':
-    q = np.ones((len(freq),len(freq)))
-elif thetha_phi == 'denum':
-    q = np.array(np.square(abs(data_frf)))
-    
-#%%
-#Calculating Polynomials
-R_minus_1 = np.zeros((len(freq)))            
-R_0 = np.ones((len(freq),len(freq))).dot((1/np.sqrt(2*sum(q.transpose()))))
-R=[R_minus_1, R_0]
-
-#computing the weighing function of the Rational Fraction
-for i in range(max_k):
-    v_k = 2*sum(freq*R[i+1]*R[i]*q)
-    s_k = freq*R[i+1]-v_k*R[i]
-    d_k = np.sqrt(2*sum((s_k**2)*q))
-    R_ = s_k/d_k
-    R.append(R_)
-#Orthogonal Matrix
-R = R[1:-1]
-
-#Complex complex part of polynomial
-j_k = [np.sqrt(-1)]*max_k
-P = R*j_k
+freq_data = pd.DataFrame(freq)
+scipy.io.savemat('Freq.mat',{'struct1':freq_data.to_dict("list")})
+scipy.io.savemat('FRF_DTHIVE.mat',{'struct1':data_frf.to_dict("list")})
 
 
-    
-        
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
