@@ -18,7 +18,7 @@ for iter_ in iters:
     for rep in reps: 
         test_rep = rep
         test_name = test_series + '_' + str(iter_) + '_' + str(test_rep)
-        zip_file_path = "G:/My Drive/DTHIVE/Python Code/Test_Data/" + test_series + "/"+ test_series \
+        zip_file_path = "Test_Data/" + test_series + "/"+ test_series \
             + "_" + str(iter_)+ '/' + test_series + "_" \
                 + str(iter_) + "_" + str(rep) + '.zip'
         #directory for dumping the extraction file
@@ -40,7 +40,7 @@ for iter_ in iters:
         if not sensor_frf_lists:
             sensor_frf_lists = {key:[] for key in list_files}
             sensor_frf_freq_lists = {key:[] for key in list_files}
-        
+
         #create combine all repetition for each sensor
         for sensor in list_files:
             #open file
@@ -50,14 +50,14 @@ for iter_ in iters:
             
             all_data = sensor_['data']
             #extract individual data
-            frf, coh = all_data[-1], all_data[3]
+            frf= all_data[-1]
             
             #zip all data with corresponding frequencies
             frf_data, frf_freq = frf['data_y'],frf['data_x']
             
             #Append the zipped data in a list for each sensors
             sensor_frf_lists[sensor].append(frf_data) 
-            sensor_frf_freq_lists[sensor].append(frf_freq) 
+
             
     # Empty dic. for all iteration of individual sensor
     if not sensor_frf_mean:
@@ -67,15 +67,14 @@ for iter_ in iters:
     for sensors in sensor_frf_lists:
         freqs_frf = sensor_frf_freq_lists[sensors]
         frf = sensor_frf_lists[sensors]
-
+        
         #find average of all iterations
         frf_average = [sum(frf_list) / len(frf_list) for frf_list in zip(*sensor_frf_lists[sensors])]
         frf_freq_average = [sum(frf_freq_list) / len(frf_freq_list) for frf_freq_list in zip(*sensor_frf_freq_lists[sensors])]
-         
+        
         #Store average for this sensor in the empty dictionary
         sensor_frf_mean[sensors] = frf_average
         sensor_frf_freq_mean[sensors] = frf_freq_average
-  
 
 #%%
 
@@ -109,12 +108,12 @@ def orthogonal(frf, freq, max_k, thetha_phi):
     
     #Calculating the weighting function at the i_th frequency
     if thetha_phi == 'num':
-        q = np.array([1]*len(freq))
+        q = np.ones(len(freq),len(freq))
     elif thetha_phi == 'denum':
         q = np.array(abs(data_frf)**2)
     #Calculating Polynomials
-    R_minus_1 = np.array([0]*len(freq))
-    R_0 = np.array([1]*len(freq))*(1/np.sqrt(2*sum(q)))
+    R_minus_1 = np.zeros(len(freq),len(freq))
+    R_0 = np.ones(len(freq),len(freq))*(1/np.sqrt(2*sum(q)))
     R=[R_minus_1, R_0]
     
     #computing the weighing function of the Rational Fraction
