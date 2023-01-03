@@ -115,19 +115,21 @@ if thetha_phi == 'num':
 elif thetha_phi == 'denum':
     q = np.array(np.square(abs(data_frf)))
     
-#%%
+
 #Calculating Polynomials
 R_minus_1 = np.zeros((len(freq)))            
-R_0 = np.ones((len(freq),len(freq))).dot((1/np.sqrt(2*sum(q.transpose()))))
+R_0 = np.ones(len(freq))*(1/np.sqrt(2*sum(q[:,0]))) #add an interation for all sensor channel
 R=[R_minus_1, R_0]
-
+#%%
 #computing the weighing function of the Rational Fraction
 for i in range(max_k):
-    v_k = 2*sum(freq*R[i+1]*R[i]*q)
+    v_k = 2*sum(freq*R[i+1]*R[i]*q[:,0])
     s_k = freq*R[i+1]-v_k*R[i]
-    d_k = np.sqrt(2*sum((s_k**2)*q))
+    d_k = np.sqrt(2*sum((s_k**2)*q[:,0]))
     R_ = s_k/d_k
     R.append(R_)
+    
+#%%
 #Orthogonal Matrix
 R = R[1:-1]
 

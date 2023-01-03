@@ -78,9 +78,17 @@ for iter_ in iters:
         #Store average for this sensor in the empty dictionary
         sensor_frf_mean[sensors] = frf_average
         sensor_frf_freq_mean[sensors] = frf_freq_average
-
 #%%
-
+#converting list of tubles to list
+for sensors in sensor_frf_mean.keys():
+    sensor_frf_mean[sensors] = [data for datas in sensor_frf_mean[sensors] for data in datas ]
+#%%
+#converting list of tubles to list
+import operator
+from functools import reduce
+for sensors in sensor_frf_mean.keys():
+    sensor_frf_mean[sensors] = list(reduce(operator.concat, sensor_frf_mean[sensors]))
+#%%
 #Convert average frf for all sensor to dataframe
 data__frf = pd.DataFrame(sensor_frf_mean)  
 data_frf = pd.DataFrame(sensor_frf_mean)   
@@ -94,9 +102,8 @@ freq = np.array(data_freq[:,0])
 
 #%%
 
-freq_data = pd.DataFrame(freq)
-scipy.io.savemat('Freq.mat',{'struct1':freq_data.to_dict("list")})
-scipy.io.savemat('FRF_DTHIVE.mat',{'struct1':data_frf.to_dict("list")})
+scipy.io.savemat('Freq.mat',sensor_frf_freq_mean)
+scipy.io.savemat('FRF_DTHIVE.mat',sensor_frf_mean)
 
 
 
