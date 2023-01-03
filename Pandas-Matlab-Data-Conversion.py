@@ -38,6 +38,9 @@ for iter_ in iters:
         #Remove FRC which is an empty list
         list_files.remove('FRC.pickle')
         
+        #Data dictionary label
+        data_labels = [word[:-7] for word in list_files]
+        
         #create an empty list for frf and coh and their frequencies for each sensor
         if not sensor_frf_lists:
             sensor_frf_lists = {key:[] for key in list_files}
@@ -64,8 +67,8 @@ for iter_ in iters:
             
     # Empty dic. for all iteration of individual sensor
     if not sensor_frf_mean:
-        sensor_frf_mean = {key:[] for key in list_files}
-        sensor_frf_freq_mean = {key:[] for key in list_files}
+        sensor_frf_mean = {key:[] for key in data_labels}
+        sensor_frf_freq_mean = {key:[] for key in data_labels}
         
     for sensors in sensor_frf_lists:
         freqs_frf = sensor_frf_freq_lists[sensors]
@@ -76,33 +79,13 @@ for iter_ in iters:
         frf_freq_average = [sum(frf_freq_list) / len(frf_freq_list) for frf_freq_list in zip(*sensor_frf_freq_lists[sensors])]
         
         #Store average for this sensor in the empty dictionary
-        sensor_frf_mean[sensors] = frf_average
-        sensor_frf_freq_mean[sensors] = frf_freq_average
-#%%
-#converting list of tubles to list
-for sensors in sensor_frf_mean.keys():
-    sensor_frf_mean[sensors] = [data for datas in sensor_frf_mean[sensors] for data in datas ]
-#%%
-#converting list of tubles to list
-import operator
-from functools import reduce
-for sensors in sensor_frf_mean.keys():
-    sensor_frf_mean[sensors] = list(reduce(operator.concat, sensor_frf_mean[sensors]))
-#%%
-#Convert average frf for all sensor to dataframe
-data__frf = pd.DataFrame(sensor_frf_mean)  
-data_frf = pd.DataFrame(sensor_frf_mean)   
-data_frf = data_frf.to_numpy()
-
-#Convert average frequency for all sensor to dataframe
-data_freq = pd.DataFrame(sensor_frf_freq_mean)   
-data_freq = data_freq.to_numpy()
-freq = np.array(data_freq[:,0])
-
+        sensor_frf_mean[sensors[:-7]] = frf_average
+        sensor_frf_freq_mean[sensors[:-7]] = frf_freq_average
 
 #%%
 
-scipy.io.savemat('Freq.mat',sensor_frf_freq_mean)
+# Extracting frequency and FRF data to matlab .mat file format
+scipy.io.savemat('Freq.mat', sensor_frf_freq_mean)
 scipy.io.savemat('FRF_DTHIVE.mat',sensor_frf_mean)
 
 
