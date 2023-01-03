@@ -40,7 +40,7 @@ for iter_ in iters:
         if not sensor_frf_lists:
             sensor_frf_lists = {key:[] for key in list_files}
             sensor_frf_freq_lists = {key:[] for key in list_files}
-
+        
         #create combine all repetition for each sensor
         for sensor in list_files:
             #open file
@@ -50,15 +50,14 @@ for iter_ in iters:
             
             all_data = sensor_['data']
             #extract individual data
-            frf= all_data[-1]
+            frf, coh = all_data[-1], all_data[3]
             
             #zip all data with corresponding frequencies
             frf_data, frf_freq = frf['data_y'],frf['data_x']
             
             #Append the zipped data in a list for each sensors
-            sensor_frf_lists[sensor].append(frf_data)
+            sensor_frf_lists[sensor].append(frf_data) 
             sensor_frf_freq_lists[sensor].append(frf_freq) 
-
             
     # Empty dic. for all iteration of individual sensor
     if not sensor_frf_mean:
@@ -68,14 +67,15 @@ for iter_ in iters:
     for sensors in sensor_frf_lists:
         freqs_frf = sensor_frf_freq_lists[sensors]
         frf = sensor_frf_lists[sensors]
-        
+
         #find average of all iterations
         frf_average = [sum(frf_list) / len(frf_list) for frf_list in zip(*sensor_frf_lists[sensors])]
         frf_freq_average = [sum(frf_freq_list) / len(frf_freq_list) for frf_freq_list in zip(*sensor_frf_freq_lists[sensors])]
-        
+         
         #Store average for this sensor in the empty dictionary
         sensor_frf_mean[sensors] = frf_average
         sensor_frf_freq_mean[sensors] = frf_freq_average
+  
 
 #%%
 
@@ -103,36 +103,37 @@ num_mode = 2
 max_k = 2* num_mode
 
 #Generating Orthorgonal Polynomial
-
-#This function generates the orthogonal polynomial
-#and returns the transformation matric and Polynomials
-thetha_phi = 'num'
-
-
-#Calculating the weighting function at the i_th frequency
-if thetha_phi == 'num':
-    q = np.ones(len(freq),len(freq))
-elif thetha_phi == 'denum':
-    q = np.array(abs(data_frf)**2)
-#Calculating Polynomials
-R_minus_1 = np.zeros(len(freq),len(freq))
-R_0 = np.ones(len(freq),len(freq))*(1/np.sqrt(2*sum(q)))
-R=[R_minus_1, R_0]
-
-#computing the weighing function of the Rational Fraction
-for i in range(max_k):
-    v_k = 2*sum(freq*R[i+1]*R[i]*q)
-    s_k = freq*R[i+1]-v_k*R[i]
-    d_k = np.sqrt(2*sum((s_k**2)*q))
-    R_ = s_k/d_k
-    R.append(R_)
-#Orthogonal Matrix
-R = R[1:-1]
-
-#Complex complex part of polynomial
-j_k = [np.sqrt(-1)]*max_k
-P = R*j_k
-
+def orthogonal(frf, freq, max_k, thetha_phi):
+    #This function generates the orthogonal polynomial
+    #and returns the transformation matric and Polynomials
+    
+    #Calculating the weighting function at the i_th frequency
+    if thetha_phi == 'num':
+        q = np.array([1]*len(freq))
+    elif thetha_phi == 'denum':
+        q = np.array(abs(data_frf)**2)
+    #Calculating Polynomials
+    R_minus_1 = np.array([0]*len(freq))
+    R_0 = np.array([1]*len(freq))*(1/np.sqrt(2*sum(q)))
+    R=[R_minus_1, R_0]
+    
+    #computing the weighing function of the Rational Fraction
+    for i in range(max_k):
+        v_k = 2*sum(freq*R[i+1]*R[i]*q)
+        s_k = freq*R[i+1]-v_k*R[i]
+        d_k = np.sqrt(2*sum((s_k**2)*q))
+        R_ = s_k/d_k
+        R.append(R_)
+    #Orthogonal Matrix
+    R = R[1:-1]
+    
+    #Complex complex part of polynomial
+    j_k = [np.sqrt(-1)]*max_k
+    P = R*j_k
+    
+    return P
+matrix_phi = orthogonal(frf, freq, m, 'num')
+matrix_theta = orthogonal(frf, freq, n, 'denum')
 
     
         

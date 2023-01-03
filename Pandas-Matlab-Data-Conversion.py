@@ -1,9 +1,5 @@
-import pandas as pd
 import scipy.io
 import os,pickle,zipfile
-import numpy as np
-
-
 
 #Import and process FRF data
 iters = [10]

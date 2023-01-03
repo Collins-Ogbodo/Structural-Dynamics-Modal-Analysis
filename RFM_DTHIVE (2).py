@@ -103,36 +103,37 @@ num_mode = 2
 max_k = 2* num_mode
 
 #Generating Orthorgonal Polynomial
-
-#This function generates the orthogonal polynomial
-#and returns the transformation matric and Polynomials
-thetha_phi = 'num'
-
-
-#Calculating the weighting function at the i_th frequency
-if thetha_phi == 'num':
-    q = np.ones(len(freq),len(freq))
-elif thetha_phi == 'denum':
-    q = np.array(abs(data_frf)**2)
-#Calculating Polynomials
-R_minus_1 = np.zeros(len(freq),len(freq))
-R_0 = np.ones(len(freq),len(freq))*(1/np.sqrt(2*sum(q)))
-R=[R_minus_1, R_0]
-
-#computing the weighing function of the Rational Fraction
-for i in range(max_k):
-    v_k = 2*sum(freq*R[i+1]*R[i]*q)
-    s_k = freq*R[i+1]-v_k*R[i]
-    d_k = np.sqrt(2*sum((s_k**2)*q))
-    R_ = s_k/d_k
-    R.append(R_)
-#Orthogonal Matrix
-R = R[1:-1]
-
-#Complex complex part of polynomial
-j_k = [np.sqrt(-1)]*max_k
-P = R*j_k
-
+def orthogonal(frf, freq, max_k, thetha_phi):
+    #This function generates the orthogonal polynomial
+    #and returns the transformation matric and Polynomials
+    
+    #Calculating the weighting function at the i_th frequency
+    if thetha_phi == 'num':
+        q = np.ones(len(freq),len(freq))
+    elif thetha_phi == 'denum':
+        q = np.array(abs(data_frf)**2)
+    #Calculating Polynomials
+    R_minus_1 = np.zeros(len(freq),len(freq))
+    R_0 = np.ones(len(freq),len(freq))*(1/np.sqrt(2*sum(q)))
+    R=[R_minus_1, R_0]
+    
+    #computing the weighing function of the Rational Fraction
+    for i in range(max_k):
+        v_k = 2*sum(freq*R[i+1]*R[i]*q)
+        s_k = freq*R[i+1]-v_k*R[i]
+        d_k = np.sqrt(2*sum((s_k**2)*q))
+        R_ = s_k/d_k
+        R.append(R_)
+    #Orthogonal Matrix
+    R = R[1:-1]
+    
+    #Complex complex part of polynomial
+    j_k = [np.sqrt(-1)]*max_k
+    P = R*j_k
+    
+    return P
+matrix_phi = orthogonal(frf, freq, m, 'num')
+matrix_theta = orthogonal(frf, freq, n, 'denum')
 
     
         
