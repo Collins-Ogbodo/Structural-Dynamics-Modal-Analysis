@@ -35,7 +35,8 @@ for iter_ in iters:
         list_files.remove('FRC.pickle')
         
         #Data dictionary label
-        data_labels = [word[:-7] for word in list_files]
+        data_labels = [label[:-7] for label in list_files]
+        data_labels = [label.replace("-", "_" ) for label in data_labels]
         
         #create an empty list for frf and coh and their frequencies for each sensor
         if not sensor_frf_lists:
@@ -73,10 +74,11 @@ for iter_ in iters:
         #find average of all iterations
         frf_average = [sum(frf_list) / len(frf_list) for frf_list in zip(*sensor_frf_lists[sensors])]
         frf_freq_average = [sum(frf_freq_list) / len(frf_freq_list) for frf_freq_list in zip(*sensor_frf_freq_lists[sensors])]
-        
+        sensor = sensors[:-7]
+        sensor = sensor.replace('-','_')
         #Store average for this sensor in the empty dictionary
-        sensor_frf_mean[sensors[:-7]] = frf_average
-        sensor_frf_freq_mean[sensors[:-7]] = frf_freq_average
+        sensor_frf_mean[sensor] = frf_average
+        sensor_frf_freq_mean[sensor] = frf_freq_average
 
 #%%
 
