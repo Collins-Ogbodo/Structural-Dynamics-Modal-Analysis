@@ -81,9 +81,10 @@ for iter_ in iters:
         sensor_frf_freq_mean[sensor] = frf_freq_average
 
 #%%
-
+Freq = {}
+Freq['Freq'] = sensor_frf_freq_mean['EXH']
 # Extracting frequency and FRF data to matlab .mat file format
-scipy.io.savemat('Freq.mat', sensor_frf_freq_mean)
+scipy.io.savemat('Freq.mat', Freq)
 scipy.io.savemat('FRF_DTHIVE.mat',sensor_frf_mean)
 
 
