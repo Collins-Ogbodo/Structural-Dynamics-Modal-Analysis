@@ -152,9 +152,6 @@ def rational_polynomial_method(frf, freq, dof):
     
     return nat_freq, dam_fact, mod_const, mode_shape
 
-
-#%%
-
 #%%
 Freq = {}
 Freq['Freq'] = sensor_frf_freq_mean['EXH']

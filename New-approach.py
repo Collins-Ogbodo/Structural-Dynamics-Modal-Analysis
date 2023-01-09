@@ -82,86 +82,111 @@ for iter_ in iters:
 #%%
 import numpy as np
 import scipy as sp
-def rational_polynomial_method(frf, fs, degree=2):
+def rational_polynomial_method(frf, freq, dof):
     """
     Estimate the natural frequency, damping factor, modal constant, and mode shape
     of a system from its complex frequency response function (FRF).
     
     Parameters
     ----------
-    frf : array-like
-        The complex frequency response function of the system.
+    frf : complex
+        The frequency response function of the system.
     fs : float
         The sampling frequency of the FRF.
-    degree : int, optional
-        The degree of the rational polynomial approximation. Default is 2.
+    dof : int
+        The degree of freedon of the system.
         
     Returns
     -------
-    omega : float
+    nat_freq : float
         The natural frequency of the system.
-    zeta : float
+    dam_fact : float
         The damping factor of the system.
-    k : float
+    mod_const : float
         The modal constant of the system.
     mode_shape : array-like
         The mode shape of the system.
     """
+
+    # Convert FRF and Frequency to coefficients of the rational partial fraction
+    from scipy.optimize import curve_fit
+
+    def rational_fraction(w, b, a):
+        
+        #i = np.sqrt(-1)
+        # Compute the rational fraction at each frequency w
+        return np.polyval(b, w) / np.polyval(a, w)
+    
+
+    #computing the polynomial order for numerator and denominator 
+    m= 2*dof-1; 
+    n= 2*dof;
+    # Initial guess for the coefficients c and d
+    b0 = np.zeros(n)
+    a0 = np.ones(m)
+
+    # Fit the rational fraction to the FRF
+    # Return the coefficients of the rational fraction transfer function
+    b, a = curve_fit(rational_fraction, freq, frf, p0=(b0, a0))[0]
+
     # Convert the FRF to a rational polynomial
-    r, p, k = sp.signal.residue(frf, np.ones(degree+1), tol=1e-6)
+    r, p, mod_const = sp.signal.residue(b, a)
     
     # Find the poles of the rational polynomial
-    poles = p[np.abs(k) > 1e-6]
+    poles = p #[np.abs(mod_const) > 1e-6]
     
     # Find the natural frequency and damping factor of the system
-    omega = np.abs(poles[0])
-    zeta = -np.real(poles[0]) / omega
+    nat_freq = np.abs(poles[0])
+    dam_fact = -np.real(poles[0]) / nat_freq
     
     # Find the modal constant
-    k = np.abs(k[0])
+    mod_const = np.abs(mod_const[0])
     
     # Find the mode shape
-    mode_shape = r[0] / k
+    mode_shape = r[0] / mod_const
     
-    return omega, zeta, k, mode_shape
+    return nat_freq, dam_fact, mod_const, mode_shape
 
 #%%
 
-def rational_polynomial(frf, n_modes=6):
-    """
-    Estimate natural frequencies, damping ratios, modal constants, and mode shapes
-    using the rational polynomial method.
-    
-    Parameters:
-    -----------
-    frf : array_like
-        Complex frequency response function.
-    n_modes : int, optional
-        Number of modes to estimate. Default is 1.
-        
-    Returns:
-    --------
-    freqs : ndarray
-        Estimated natural frequencies.
-    damping : ndarray
-        Estimated damping ratios.
-    constants : ndarray
-        Estimated modal constants.
-    shapes : ndarray
-        Estimated mode shapes.
-    """
-    # Compute the poles and residues of the FRF using partial fraction expansion
-    poles, residues = np.polynomial.polynomial.polypow(frf, m=n_modes)
-    
-    # Extract the natural frequencies and damping ratios from the poles
-    freqs = np.abs(poles)
-    damping = -np.real(poles) / freqs
-    
-    # Compute the modal constants and mode shapes
-    constants = np.abs(residues)
-    shapes = np.angle(residues)
-    
-    return freqs, damping, constants, shapes
+#%%
+# =============================================================================
+# 
+# def rational_polynomial(frf, n_modes=6):
+#     """
+#     Estimate natural frequencies, damping ratios, modal constants, and mode shapes
+#     using the rational polynomial method.
+#     
+#     Parameters:
+#     -----------
+#     frf : array_like
+#         Complex frequency response function.
+#     n_modes : int, optional
+#         Number of modes to estimate. Default is 1.
+#         
+#     Returns:
+#     --------
+#     freqs : ndarray
+#     damping : ndarray
+#         Estimated damping ratios.
+#     constants : ndarray
+#         Estimated modal constants.
+#     shapes : ndarray
+#         Estimated mode shapes.
+#     """
+#     # Compute the poles and residues of the FRF using partial fraction expansion
+#     poles, residues = np.polynomial.polynomial.polypow(frf, m=n_modes)
+#     
+#     # Extract the natural frequencies and damping ratios from the poles
+#     freqs = np.abs(poles)
+#     damping = -np.real(poles) / freqs
+#     
+#     # Compute the modal constants and mode shapes
+#     constants = np.abs(residues)
+#     shapes = np.angle(residues)
+#     
+#     return freqs, damping, constants, shapes
+# =============================================================================
 
 #%%
 import pandas as pd
@@ -170,10 +195,6 @@ data_frf = pd.DataFrame(sensor_frf_mean)
 data_frf = data_frf.to_numpy()
 
 #%%
-
-dof = 2
-m= 2*dof-1; 
-n= 2*dof;
 Freq = {}
 Freq['Freq'] = sensor_frf_freq_mean['EXH']
 sensor_para = []
@@ -182,6 +203,10 @@ sensor_para = []
 frf = data_frf[:,0]
 fs = np.array(Freq['Freq'])
 wn, zeta, phi, c = rational_polynomial_method(frf, fs)
+
+
+wn, zeta, phi, c = rational_polynomial_method(frf, Freq, 2)
+
 modal_para = {}
 modal_para['wn'] = wn
 modal_para['zeta'] = zeta
